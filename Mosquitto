@@ -86,28 +86,35 @@ void splitMessage(const char *payload, int payloadlen, char *DateTime, char *Tot
             case 0:
                 DateTime[DateTimeIndex++] = payload[i];
                 break;
-            case 1:
+            case 5:
                 TotalDayUsage[TotalDayUsageIndex++] = payload[i];
                 break;
-            case 2:
+            case 6:
                 TotalNightUsage[TotalNightUsageIndex++] = payload[i];
                 break;
-            case 3:
+            case 7:
                 TotalDayWinst[TotalDayWinstIndex++] = payload[i];
                 break;
-            case 4:
+            case 8:
                 TotalNightWinst[TotalNightWinstIndex++] = payload[i];
                 break;
-            case 5:
+            case 10:
                 TotalGasUsage[TotalGasUsageIndex++] = payload[i];
                 break;
             }
         }
-        char *date;
-        if (currentArray < 8) 
+
+        if (currentArray < 10 )
         {
             currentArray = 0;
+            if (firstdata == 1){
+            PrintFirstRecords(DateTime, TotalDayUsage, TotalNightUsage, TotalDayWinst, TotalNightWinst, TotalGasUsage);
             firstdata = 0;
+            }
+            else 
+            {
+                PrintRecords(DateTime, TotalDayUsage, TotalNightUsage, TotalDayWinst, TotalNightWinst, TotalGasUsage);
+            }
         }
     
     }
@@ -119,7 +126,14 @@ int somTotalStartUsage(char *TotalDayUsage, char *TotalNightUsage){
     somTotalStartUsage = totalDayUsage + totalNightUsage;
     return somTotalStartUsage;
 }
+int somTotalStartWinst(char *TotalDayWinst, char* TotalNightWinst){
+    int somTotalStartWinst = 0;
+    int totalDayWinst = atoi(TotalDayWinst);
+    int totalNightWinst = atoi(TotalNightWinst);
+    somTotalStartWinst = totalDayWinst + totalNightWinst;
+    return somTotalStartWinst;
 
+}
 int somTotalUsage(char *TotalDayUsage, char *TotalNightUsage){
     int somTotalUsage = 0;
     int totalDayUsage = atoi(TotalDayUsage);
@@ -134,10 +148,16 @@ int somTotalWinst(char *TotalDayWinst, char *TotalNightWinst){
     somTotalWinst = totalDayWinst + totalNightWinst;
     return somTotalWinst;
 }
+int dateTime(char *DateTime){
+    int dateTime = DateTime[1] + DateTime[2];
+    
+    int IdateTime = atoi(dateTime);
+    return IdateTime;
+} 
 
 void PrintFirstRecords(char *DateTime, char *TotalDayUsage, char *TotalNightUsage, char *TotalDayWinst, char *TotalNightWinst, char *TotalGasUsage){
-    somTotalUsage(TotalDayUsage, TotalNightUsage);
-    somTotalWinst(TotalDayWinst, TotalNightWinst);
+    somTotalStartUsage(TotalDayUsage, TotalNightUsage);
+    somTotalStartWinst(TotalDayWinst, TotalNightWinst);
     printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
     printf("Elektriciteit- en gas verbruik - totalen per dag\n");
     printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n");
