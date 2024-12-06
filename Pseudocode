@@ -4,11 +4,19 @@ log all incomming records
 
 split the message into
     DateTime
-    TotalDayUssage
+    TotalDayUsage
     TotalNightUsage
     TotalDayWinst
     TotalNightWinst
     TotalGasUsage
+
+Som total Usage 
+    turn TotalUsage ,TotalDayUsage & TotalNightUsage into float
+    TotalUsage = TotalDayUsage + TotalNightUsage
+
+Som Total winst
+    turn TotalWinst ,TotalDayWinst & TotalNightWinst into float
+    TotalWinst = TotalDayWinst + TotalNightWinst
 
 print the records
 
