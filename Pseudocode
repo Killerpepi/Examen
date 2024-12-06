@@ -1,0 +1,22 @@
+mqtt receive message
+
+log all incomming records
+
+split the message into
+    DateTime
+    TotalDayUssage
+    TotalNightUsage
+    TotalDayWinst
+    TotalNightWinst
+    TotalGasUsage
+
+print the records
+
+    print header
+
+    print data per date
+
+    check for all 0 message to end the program
+        if all 0 print End of data.
+
+
