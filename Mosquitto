@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <MQTTClient.h>
+#include <unistd.h> // For sleep function
 
 #define ADDRESS     "tcp://192.168.0.104:1883"                    // !! IP-address:Port-ID
 #define CLIENTID    "PClient"                                     // Unique client ID
@@ -28,6 +30,14 @@ int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *m
 
     logMsg(data_in);
 
+    int payloadlen = strlen(data_in);
+    char DateTime[50];
+    char TotalDayUsage[50]; 
+    char TotalNightUsage[50]; 
+    char TotalDayWinst[50]; 
+    char TotalNightWinst[50];
+    char TotalGasUsage[50];
+    splitMessage(data_in, payloadlen, DateTime, TotalDayUsage, TotalNightUsage, TotalDayWinst, TotalNightWinst, TotalGasUsage);
     // Create a new client to publish the message
     MQTTClient client = (MQTTClient)context;
     MQTTClient_message pubmsg = MQTTClient_message_initializer;
@@ -52,6 +62,111 @@ void logMsg(const char *payload) {
     fprintf(Logfile, "%s\n", payload);
 }
 
+void splitMessage(const char *payload, int payloadlen, char *DateTime, char *TotalDayUsage, char *TotalNightUsage, char *TotalDayWinst, char *TotalNightWinst, char *TotalGasUsage)
+{   
+    int DateTimeIndex = 0;
+    int currentArray = 0;
+    int TotalDayUsageIndex = 0;
+    int TotalNightUsageIndex = 0;
+    int TotalDayWinstIndex = 0;
+    int TotalNightWinstIndex = 0;
+    int TotalGasUsageIndex = 0;
+    int firstdata = 1;
+
+    for (int i = 0; i < payloadlen; i++)
+    {
+        if (payload[i] == ';')
+        {
+            currentArray++;
+        }
+        else
+        {
+            switch (currentArray)
+            {
+            case 0:
+                DateTime[DateTimeIndex++] = payload[i];
+                break;
+            case 1:
+                TotalDayUsage[TotalDayUsageIndex++] = payload[i];
+                break;
+            case 2:
+                TotalNightUsage[TotalNightUsageIndex++] = payload[i];
+                break;
+            case 3:
+                TotalDayWinst[TotalDayWinstIndex++] = payload[i];
+                break;
+            case 4:
+                TotalNightWinst[TotalNightWinstIndex++] = payload[i];
+                break;
+            case 5:
+                TotalGasUsage[TotalGasUsageIndex++] = payload[i];
+                break;
+            }
+        }
+        char *date;
+        if (currentArray < 8) 
+        {
+            currentArray = 0;
+            firstdata = 0;
+        }
+    
+    }
+}
+int somTotalStartUsage(char *TotalDayUsage, char *TotalNightUsage){
+    int somTotalStartUsage = 0;
+    int totalDayUsage = atoi(TotalDayUsage);
+    int totalNightUsage = atoi(TotalNightUsage);
+    somTotalStartUsage = totalDayUsage + totalNightUsage;
+    return somTotalStartUsage;
+}
+
+int somTotalUsage(char *TotalDayUsage, char *TotalNightUsage){
+    int somTotalUsage = 0;
+    int totalDayUsage = atoi(TotalDayUsage);
+    int totalNightUsage = atoi(TotalNightUsage);
+    somTotalUsage = totalDayUsage + totalNightUsage;
+    return somTotalUsage;
+}
+int somTotalWinst(char *TotalDayWinst, char *TotalNightWinst){
+    int somTotalWinst = 0;
+    int totalDayWinst = atoi(TotalDayWinst);
+    int totalNightWinst = atoi(TotalNightWinst);
+    somTotalWinst = totalDayWinst + totalNightWinst;
+    return somTotalWinst;
+}
+
+void PrintFirstRecords(char *DateTime, char *TotalDayUsage, char *TotalNightUsage, char *TotalDayWinst, char *TotalNightWinst, char *TotalGasUsage){
+    somTotalUsage(TotalDayUsage, TotalNightUsage);
+    somTotalWinst(TotalDayWinst, TotalNightWinst);
+    printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+    printf("Elektriciteit- en gas verbruik - totalen per dag\n");
+    printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n");
+    printf("STARTWAARDEN\n\n");
+    printf("DATUM - TIJD: %s\n", DateTime);
+    printf("DAG     Totaal verbruik     = %s\n  kWh", TotalDayUsage);
+    printf("DAG     Totaal opbrengst    = %s\n  kWh", TotalDayWinst);
+    printf("Nacht   Totaal verbruik     = %s\n  kWh", TotalNightUsage);
+    printf("Nacht   Totaal opbrengst    = %s\n  kWh", TotalNightWinst);
+    printf("GAS     Totaal verbruik     = %s\n  kWh", TotalGasUsage);
+    printf("------------------------------------------------------------------------------\n");
+    printf("TOTALEN:");
+    printf("------------------------------------------------------------------------------\n\n");
+}
+
+void PrintRecords(char *DateTime, char *TotalDayUsage, char *TotalNightUsage, char *TotalDayWinst, char *TotalNightWinst, char *TotalGasUsage){
+    somTotalUsage(TotalDayUsage, TotalNightUsage);
+    somTotalWinst(TotalDayWinst, TotalNightWinst);
+    printf("DATUM - TIJD: %s\n", DateTime);
+    printf("------------------------------------------------------------------------------\n");
+    printf("STROOM");
+    printf("        Totaal verbruik     = %s\n  kWh", TotalDayUsage);
+    printf("        Totaal opbrengst    = %s\n  kWh", TotalDayWinst);
+    printf("        Totaal verbruik     = %s\n  kWh", TotalNightUsage);
+    printf("        Totaal opbrengst    = %s\n  kWh", TotalNightWinst);
+    printf("        Totaal verbruik     = %s\n  kWh", TotalGasUsage);
+
+    printf("------------------------------------------------------------------------------\n\n");
+}
 int main() {
    // Open MQTT client for listening
     
