@@ -5,7 +5,7 @@
 
 #define ADDRESS     "tcp://192.168.0.104:1883"                    // !! IP-address:Port-ID
 #define CLIENTID    "PClient"                                     // Unique client ID
-#define SUB_TOPIC   "EXAME"                                       // MQTT topic
+#define SUB_TOPIC   "P1/DM8"                                       // MQTT topic
 #define QOS         1                                             // Quality of Service level
 #define TIMEOUT     10000L                                        // Timeout in milliseconds
 #define DEBUG       1
@@ -22,9 +22,11 @@ void delivered(void *context, MQTTClient_deliveryToken dt) {
 
 // This function is called upon when an incoming message from mqtt is arrived
 int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *message) {
-    char *error_in = message->payload;
+    char *data_in = message->payload;
 
-    printf( "Msg in : <%s>\n", error_in );
+    printf( "Msg in : <%s>\n", data_in );
+
+    logMsg(data_in);
 
     // Create a new client to publish the message
     MQTTClient client = (MQTTClient)context;
@@ -33,6 +35,7 @@ int msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_message *m
 
     MQTTClient_freeMessage(&message);
     MQTTClient_free(topicName);
+    
     
     return 1;
 }
@@ -43,14 +46,12 @@ void connlost(void *context, char *cause) {
     printf("     cause: %s\n", cause);
 }
 
-// This is the main function:
-// A infenite loop doing:
-// (1) using the startup parameter to set the language file name to be read
-// (2) read the error file and put the error code & error message in a linked list
-// (3) Open MQTT Client for listening
-//     Set MQTT msgarrvd function => This function is called upon when a message arrives
-//     In this function, read the incoming message, format the outgoing message and send it out
-// 
+void logMsg(const char *payload) {
+    // Open the logfile
+    FILE*Logfile = fopen("OUTPUT.txt", "a");
+    fprintf(Logfile, "%s\n", payload);
+}
+
 int main() {
    // Open MQTT client for listening
     
@@ -73,10 +74,13 @@ int main() {
 
     // Keep the program running to continue receiving and publishing messages
     for(;;) {
-        delay(1);
+        usleep(50000);
     }
 
     MQTTClient_disconnect(client, 10000);
     MQTTClient_destroy(&client);
     return rc;
+
+
+
 }
